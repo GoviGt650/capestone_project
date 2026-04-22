@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+<div class="w-full max-w-2xl bg-white shadow-xl rounded-2xl p-6">
+
+  <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">
+    User Management
+  </h1>
+
+  <!-- Add User -->
+  <div class="flex gap-2 mb-4">
+    <input id="username"
+      type="text"
+      placeholder="Enter user name"
+      class="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+    
+    <button onclick="addUser()"
+      class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+      Add
+    </button>
+  </div>
+
+  <!-- Refresh -->
+  <button onclick="getUsers()"
+    class="w-full mb-4 bg-gray-800 text-white py-2 rounded-lg hover:bg-gray-900">
+    Refresh Users
+  </button>
+
+  <!-- Users List -->
+  <ul id="userList" class="space-y-2"></ul>
+
+</div>
+
+<script src="config.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
