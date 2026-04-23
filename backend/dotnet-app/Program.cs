@@ -2,7 +2,7 @@ using MySql.Data.MySqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Enable CORS
+// ✅ Enable CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -17,62 +17,95 @@ app.UseCors("AllowAll");
 
 string connStr = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Health
+
+// 🟢 HEALTH
 app.MapGet("/health", () =>
 {
     return Results.Json(new { status = "OK", service = ".NET" });
 });
 
-// Get users
+
+// 🔵 GET USERS
 app.MapGet("/users", () =>
 {
-    var users = new List<object>();
-
-    using var conn = new MySqlConnection(connStr);
-    conn.Open();
-
-    var cmd = new MySqlCommand("SELECT * FROM users", conn);
-    var reader = cmd.ExecuteReader();
-
-    while (reader.Read())
+    try
     {
-        users.Add(new
-        {
-            id = reader.GetInt32("id"),
-            name = reader.GetString("name")
-        });
-    }
+        var users = new List<object>();
 
-    return Results.Json(users);
+        using var conn = new MySqlConnection(connStr);
+        conn.Open();
+
+        var cmd = new MySqlCommand("SELECT * FROM users", conn);
+        var reader = cmd.ExecuteReader();
+
+        while (reader.Read())
+        {
+            users.Add(new
+            {
+                id = reader.GetInt32("id"),
+                name = reader.GetString("name")
+            });
+        }
+
+        return Results.Json(users);
+    }
+    catch (Exception ex)
+    {
+        return Results.Json(new { error = ex.Message }, statusCode: 500);
+    }
 });
 
-// Add user
+
+// 🟡 ADD USER (FIXED)
 app.MapPost("/users", async (HttpRequest request) =>
 {
-    var data = await request.ReadFromJsonAsync<dynamic>();
-    string name = data.name;
+    try
+    {
+        var data = await request.ReadFromJsonAsync<Dictionary<string, string>>();
 
-    using var conn = new MySqlConnection(connStr);
-    conn.Open();
+        if (data == null || !data.ContainsKey("name") || string.IsNullOrWhiteSpace(data["name"]))
+        {
+            return Results.BadRequest(new { error = "Name is required" });
+        }
 
-    var cmd = new MySqlCommand("INSERT INTO users (name) VALUES (@name)", conn);
-    cmd.Parameters.AddWithValue("@name", name);
-    cmd.ExecuteNonQuery();
+        string name = data["name"];
 
-    return Results.Json(new { message = "User added" });
+        using var conn = new MySqlConnection(connStr);
+        conn.Open();
+
+        var cmd = new MySqlCommand("INSERT INTO users (name) VALUES (@name)", conn);
+        cmd.Parameters.AddWithValue("@name", name);
+        cmd.ExecuteNonQuery();
+
+        return Results.Json(new { message = "User added" });
+    }
+    catch (Exception ex)
+    {
+        return Results.Json(new { error = ex.Message }, statusCode: 500);
+    }
 });
 
-// Delete user
+
+// 🔴 DELETE USER
 app.MapDelete("/users/{id}", (int id) =>
 {
-    using var conn = new MySqlConnection(connStr);
-    conn.Open();
+    try
+    {
+        using var conn = new MySqlConnection(connStr);
+        conn.Open();
 
-    var cmd = new MySqlCommand("DELETE FROM users WHERE id = @id", conn);
-    cmd.Parameters.AddWithValue("@id", id);
-    cmd.ExecuteNonQuery();
+        var cmd = new MySqlCommand("DELETE FROM users WHERE id = @id", conn);
+        cmd.Parameters.AddWithValue("@id", id);
+        cmd.ExecuteNonQuery();
 
-    return Results.Json(new { message = "Deleted" });
+        return Results.Json(new { message = "Deleted" });
+    }
+    catch (Exception ex)
+    {
+        return Results.Json(new { error = ex.Message }, statusCode: 500);
+    }
 });
 
+
+// 🚀 RUN (IMPORTANT)
 app.Run("http://0.0.0.0:8004");
