@@ -75,4 +75,4 @@ app.MapDelete("/users/{id}", (int id) =>
     return Results.Json(new { message = "Deleted" });
 });
 
-app.Run("http://localhost:8004");
+app.Run("http://0.0.0.0:8004");
