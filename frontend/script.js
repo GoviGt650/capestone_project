@@ -1,7 +1,9 @@
-function getUsers() {
-  console.log("Fetching users..."); // debug
+const API = `${BASE_URL}/${SERVICE}`;
 
-  fetch(`${BASE_URL}/users`)
+function getUsers() {
+  console.log("Fetching users...");
+
+  fetch(`${API}/users`)
     .then(res => res.json())
     .then(data => {
       const list = document.getElementById("userList");
@@ -17,11 +19,11 @@ function getUsers() {
 }
 
 function addUser() {
-  console.log("Adding user..."); // debug
+  console.log("Adding user...");
 
   const name = document.getElementById("username").value;
 
-  fetch(`${BASE_URL}/users`, {
+  fetch(`${API}/users`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -32,6 +34,6 @@ function addUser() {
   .catch(err => console.error(err));
 }
 
-// ✅ IMPORTANT FIX
+// expose to HTML
 window.getUsers = getUsers;
 window.addUser = addUser;

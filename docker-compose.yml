@@ -1,1 +1,70 @@
-# docker-compose.yml
+version: "3.9"
+
+services:
+
+  mysql:
+    image: mysql:8
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: users_db
+      MYSQL_USER: govi
+      MYSQL_PASSWORD: admin
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  fastapi:
+    build: ./backend/fastapi-app
+    container_name: fastapi-app
+    ports:
+      - "8001:8001"
+    depends_on:
+      - mysql
+
+  django:
+    build: ./backend/django-app
+    container_name: django-app
+    ports:
+      - "8002:8002"
+    depends_on:
+      - mysql
+
+  node:
+    build: ./backend/node-app   # ✅ fixed
+    container_name: node-app
+    ports:
+      - "8003:8003"
+    depends_on:
+      - mysql
+
+  dotnet:
+    build: ./backend/dotnet-app
+    container_name: dotnet-app
+    ports:
+      - "8004:8004"
+    depends_on:
+      - mysql
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-lb
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - fastapi
+      - django
+      - node
+      - dotnet
+
+volumes:
+  mysql_data:

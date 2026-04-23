@@ -1,0 +1,6 @@
+#!/home/lt-408/aws-3tier-user-project/backend/django-app/venv_django/bin/python3
+import sys
+from sqlparse.__main__ import main
+if __name__ == '__main__':
+    sys.argv[0] = sys.argv[0].removesuffix('.exe')
+    sys.exit(main())
