@@ -1,9 +1,8 @@
 // Base URL → NGINX (Docker)
 window.BASE_URL = "http://localhost:8081";
 
-// Choose backend here
-// options: "fastapi", "django", "node", "dotnet"
-window.SERVICE = "django";
+// Single API endpoint - Nginx handles all routing and load balancing
+window.API = `${window.BASE_URL}/api`;
 
-// Final API base (used in script.js)
-window.API = `${window.BASE_URL}/${window.SERVICE}`;
+console.log("🌐 API configured:", window.API);
+console.log("⚖️ Load balancing via Nginx round-robin");

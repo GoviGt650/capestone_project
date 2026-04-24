@@ -2,67 +2,312 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>User Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Management Dashboard | Enterprise</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: #0A0C10;
+      background-image: radial-gradient(circle at 25% 0%, rgba(30, 100, 200, 0.05) 0%, transparent 50%);
+    }
+
+    /* Professional glass effect */
+    .glass-card {
+      background: rgba(18, 22, 28, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(55, 65, 81, 0.5);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Smooth transitions */
+    .transition-smooth {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Input focus effect */
+    .input-focus:focus {
+      outline: none;
+      border-color: #3B82F6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Button hover effects */
+    .btn-primary {
+      background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(55, 65, 81, 0.5);
+      border: 1px solid rgba(75, 85, 99, 0.5);
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(55, 65, 81, 0.7);
+      border-color: rgba(107, 114, 128, 0.7);
+      transform: translateY(-1px);
+    }
+
+    /* User list item animation */
+    .user-item {
+      animation: fadeInUp 0.3s ease forwards;
+      opacity: 0;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Hover effect for list items */
+    .user-item-hover {
+      transition: all 0.2s ease;
+    }
+
+    .user-item-hover:hover {
+      background: rgba(59, 130, 246, 0.05);
+      border-color: rgba(59, 130, 246, 0.3);
+      transform: translateX(4px);
+    }
+
+    /* Delete button hover */
+    .delete-btn {
+      transition: all 0.2s ease;
+    }
+
+    .delete-btn:hover {
+      color: #EF4444;
+      transform: scale(1.05);
+    }
+
+    /* Toast animations */
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .toast-show {
+      animation: slideDown 0.3s ease forwards;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(31, 41, 55, 0.5);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(75, 85, 99, 0.8);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(107, 114, 128, 0.8);
+    }
+
+    /* Loading spinner */
+    .spinner {
+      border: 2px solid rgba(59, 130, 246, 0.2);
+      border-top-color: #3B82F6;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Status badge */
+    .status-badge {
+      background: rgba(34, 197, 94, 0.1);
+      color: #22C55E;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    /* Professional card shadow */
+    .card-shadow {
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    }
+
+    /* Modal animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    .animate-fade-in {
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    /* Count animation */
+    .scale-110 {
+      transform: scale(1.1);
+      transition: transform 0.2s ease;
+    }
+  </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+<body class="min-h-screen flex items-center justify-center p-6">
 
-<!-- 🔐 LOGIN -->
-<div id="loginPage" class="w-full max-w-md bg-white shadow-xl rounded-2xl p-6">
-  <h2 class="text-xl font-bold mb-4 text-center">Login</h2>
+  <!-- 🔐 LOGIN PAGE -->
+  <div id="loginPage" class="w-full max-w-md">
+    <div class="glass-card rounded-2xl p-8">
+      <!-- Logo/Brand -->
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 mb-4">
+          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+          </svg>
+        </div>
+        <h2 class="text-2xl font-semibold text-white mb-2">Welcome back</h2>
+        <p class="text-sm text-gray-400">Sign in to access the dashboard</p>
+      </div>
 
-  <input id="loginUser" placeholder="Username"
-    class="w-full mb-2 px-4 py-2 border rounded-lg">
+      <!-- Form -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Username</label>
+          <input id="loginUser" 
+                 type="text"
+                 placeholder="Enter your username"
+                 class="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 input-focus transition-smooth">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+          <input id="loginPass" 
+                 type="password"
+                 placeholder="Enter your password"
+                 class="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 input-focus transition-smooth">
+        </div>
 
-  <input id="loginPass" type="password" placeholder="Password"
-    class="w-full mb-2 px-4 py-2 border rounded-lg">
+        <button id="loginBtn"
+                class="btn-primary w-full py-2.5 rounded-lg font-medium text-white transition-smooth">
+          Sign in
+        </button>
 
-  <button onclick="login()"
-    class="w-full bg-blue-500 text-white py-2 rounded-lg">
-    Login
-  </button>
-
-  <div id="loginError" class="hidden mt-3 p-2 bg-red-100 text-red-700 rounded"></div>
-</div>
-
-<!-- 🟢 MAIN APP -->
-<div id="app" class="hidden w-full max-w-2xl bg-white shadow-xl rounded-2xl p-6">
-
-  <h1 class="text-2xl font-bold text-center mb-2">User Management</h1>
-
-  <!-- COUNT -->
-  <h3 id="userCount" class="text-center mb-4 text-gray-600">Total Users: 0</h3>
-
-  <!-- ERROR / SUCCESS -->
-  <div id="errorCard" class="hidden mb-2 p-2 bg-red-100 text-red-700 rounded"></div>
-  <div id="successCard" class="hidden mb-2 p-2 bg-green-100 text-green-700 rounded"></div>
-
-  <!-- ADD -->
-  <div class="flex gap-2 mb-4">
-    <input id="username"
-      placeholder="Enter user name"
-      class="flex-1 px-4 py-2 border rounded-lg">
-
-    <button onclick="addUser()"
-      class="bg-blue-500 text-white px-4 py-2 rounded-lg">
-      Add
-    </button>
+        <div id="loginError" class="hidden mt-4 p-3 bg-red-500 bg-opacity-10 border border-red-500 border-opacity-20 rounded-lg text-red-400 text-sm"></div>
+        
+        <div class="pt-4 text-center">
+          <p class="text-xs text-gray-500">Demo credentials: <span class="text-gray-400 font-mono">admin / admin</span></p>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- REFRESH -->
-  <button onclick="getUsers()"
-    class="w-full mb-4 bg-gray-800 text-white py-2 rounded-lg">
-    Refresh Users
-  </button>
+  <!-- 🟢 MAIN APP DASHBOARD -->
+  <div id="app" class="hidden w-full max-w-4xl">
+    <!-- Header -->
+    <div class="mb-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="text-2xl font-semibold text-white mb-1">User Management</h1>
+          <p class="text-sm text-gray-400">Manage and monitor user accounts</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <p class="text-xs text-gray-400">Signed in as</p>
+            <p class="text-sm font-medium text-white">Administrator</p>
+          </div>
+          <button id="logoutBtn" class="p-2 hover:bg-gray-800 rounded-lg transition-smooth">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
 
-  <!-- LIST -->
-  <ul id="userList" class="space-y-2"></ul>
+    <!-- Stats Card -->
+    <div class="glass-card rounded-xl p-6 mb-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-400 mb-1">Total Users</p>
+          <h3 id="userCount" class="text-3xl font-bold text-white transition-transform">0</h3>
+        </div>
+        <div class="status-badge px-3 py-1 rounded-full text-xs font-medium">
+          Active System
+        </div>
+      </div>
+    </div>
 
-</div>
+    <!-- Add User Section -->
+    <div class="glass-card rounded-xl p-6 mb-6">
+      <h3 class="text-lg font-medium text-white mb-4">Add New User</h3>
+      <div class="flex gap-3">
+        <input id="username"
+               type="text"
+               placeholder="Enter username"
+               class="flex-1 px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 input-focus transition-smooth">
+        <button id="addUserBtn"
+                class="btn-primary px-6 py-2.5 rounded-lg font-medium text-white transition-smooth flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Add User
+        </button>
+      </div>
+    </div>
 
-<script src="config.js"></script>
-<script src="script.js"></script>
+    <!-- Users List Section -->
+    <div class="glass-card rounded-xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-800">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-medium text-white">User Directory</h3>
+          <button id="refreshBtn"
+                  class="btn-secondary px-4 py-1.5 rounded-lg text-sm font-medium text-gray-300 transition-smooth flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+      
+      <div class="divide-y divide-gray-800 max-h-96 overflow-y-auto">
+        <ul id="userList" class="divide-y divide-gray-800"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Messages Container -->
+  <div id="errorCard" class="hidden fixed top-4 right-4 z-50"></div>
+  <div id="successCard" class="hidden fixed top-4 right-4 z-50"></div>
+
+  <!-- Scripts -->
+  <script src="config.js"></script>
+  <script src="script.js"></script>
 
 </body>
 </html>
