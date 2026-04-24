@@ -1,75 +1,80 @@
 const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
+require("dotenv").config();
 
 const app = express();
 
-// middleware
 app.use(cors());
 app.use(express.json());
 
 let db;
 let isConnected = false;
+let isConnecting = false;
 
-// 🔥 Retry connection logic
+// 🔥 DB CONNECT WITH SAFE RETRY
 function connectDB() {
+  if (isConnecting) return;
+  isConnecting = true;
+
   db = mysql.createConnection({
-    host: "mysql",
-    user: "govi",
-    password: "admin",
-    database: "users_db",
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
   });
 
   db.connect((err) => {
     if (err) {
-      console.error("❌ DB not ready, retrying in 3s...", err.message);
+      console.error("❌ DB not ready:", err.message);
       isConnected = false;
+      isConnecting = false;
       setTimeout(connectDB, 3000);
     } else {
       console.log("✅ MySQL Connected (Node)");
       isConnected = true;
+      isConnecting = false;
     }
   });
 
   db.on("error", (err) => {
     console.error("⚠️ DB error:", err.message);
     isConnected = false;
-
-    console.log("🔄 Reconnecting DB...");
+    isConnecting = false;
     setTimeout(connectDB, 3000);
   });
 }
 
-// start DB connection
 connectDB();
 
-// health
+// ✅ HEALTH
 app.get("/health", (req, res) => {
   res.json({ status: "OK", service: "Node.js" });
 });
 
-// get users
+// ✅ GET USERS
 app.get("/users", (req, res) => {
   if (!isConnected) {
-    return res.status(500).json({ error: "DB not connected yet" });
+    return res.status(503).json({ error: "DB not ready" });
   }
 
   db.query("SELECT * FROM users", (err, result) => {
-    if (err) {
-      console.error("❌ Query error:", err);
-      return res.status(500).json(err);
-    }
+    if (err) return res.status(500).json(err);
     res.json(result);
   });
 });
 
-// add user
+// ✅ ADD USER
 app.post("/users", (req, res) => {
   if (!isConnected) {
-    return res.status(500).json({ error: "DB not connected yet" });
+    return res.status(503).json({ error: "DB not ready" });
   }
 
   const { name } = req.body;
+
+  if (!name) {
+    return res.status(400).json({ error: "Name required" });
+  }
 
   db.query("INSERT INTO users (name) VALUES (?)", [name], (err, result) => {
     if (err) return res.status(500).json(err);
@@ -77,21 +82,20 @@ app.post("/users", (req, res) => {
   });
 });
 
-// delete user
+// ✅ DELETE USER
 app.delete("/users/:id", (req, res) => {
   if (!isConnected) {
-    return res.status(500).json({ error: "DB not connected yet" });
+    return res.status(503).json({ error: "DB not ready" });
   }
 
   const id = req.params.id;
 
   db.query("DELETE FROM users WHERE id = ?", [id], (err) => {
     if (err) return res.status(500).json(err);
-    res.json({ message: "User deleted" });
+    res.json({ message: "Deleted" });
   });
 });
 
-// start server
-app.listen(8003, () => {
-  console.log("🚀 Node running on http://localhost:8003");
+app.listen(8003, "0.0.0.0", () => {
+  console.log("🚀 Node running on port 8003");
 });
