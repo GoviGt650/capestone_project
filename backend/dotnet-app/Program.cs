@@ -15,7 +15,40 @@ var app = builder.Build();
 
 app.UseCors("AllowAll");
 
-string connStr = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// 🔥 READ FROM ENV (NO HARDCODE)
+string connStr =
+    $"server={Environment.GetEnvironmentVariable("DB_HOST")};" +
+    $"port={Environment.GetEnvironmentVariable("DB_PORT")};" +
+    $"user={Environment.GetEnvironmentVariable("DB_USER")};" +
+    $"password={Environment.GetEnvironmentVariable("DB_PASSWORD")};" +
+    $"database={Environment.GetEnvironmentVariable("DB_NAME")}";
+
+
+// 🔥 DB CONNECTION WITH RETRY
+MySqlConnection GetConnection()
+{
+    int retries = 10;
+
+    while (retries > 0)
+    {
+        try
+        {
+            var conn = new MySqlConnection(connStr);
+            conn.Open();
+            Console.WriteLine("✅ MySQL Connected (.NET)");
+            return conn;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ DB not ready: {ex.Message}");
+            Thread.Sleep(3000);
+            retries--;
+        }
+    }
+
+    throw new Exception("❌ Unable to connect to DB after retries");
+}
 
 
 // 🟢 HEALTH
@@ -32,8 +65,7 @@ app.MapGet("/users", () =>
     {
         var users = new List<object>();
 
-        using var conn = new MySqlConnection(connStr);
-        conn.Open();
+        using var conn = GetConnection();
 
         var cmd = new MySqlCommand("SELECT * FROM users", conn);
         var reader = cmd.ExecuteReader();
@@ -56,7 +88,7 @@ app.MapGet("/users", () =>
 });
 
 
-// 🟡 ADD USER (FIXED)
+// 🟡 ADD USER
 app.MapPost("/users", async (HttpRequest request) =>
 {
     try
@@ -70,8 +102,7 @@ app.MapPost("/users", async (HttpRequest request) =>
 
         string name = data["name"];
 
-        using var conn = new MySqlConnection(connStr);
-        conn.Open();
+        using var conn = GetConnection();
 
         var cmd = new MySqlCommand("INSERT INTO users (name) VALUES (@name)", conn);
         cmd.Parameters.AddWithValue("@name", name);
@@ -91,8 +122,7 @@ app.MapDelete("/users/{id}", (int id) =>
 {
     try
     {
-        using var conn = new MySqlConnection(connStr);
-        conn.Open();
+        using var conn = GetConnection();
 
         var cmd = new MySqlCommand("DELETE FROM users WHERE id = @id", conn);
         cmd.Parameters.AddWithValue("@id", id);
@@ -107,5 +137,5 @@ app.MapDelete("/users/{id}", (int id) =>
 });
 
 
-// 🚀 RUN (IMPORTANT)
+// 🚀 RUN
 app.Run("http://0.0.0.0:8004");
