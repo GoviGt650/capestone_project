@@ -10,11 +10,7 @@ pipeline {
 
     stages {
 
-        stage('Clone Repo') {
-            steps {
-                git 'https://github.com/GoviGt650/capestone_project.git'
-            }
-        }
+        
 
         stage('Login to ECR') {
             steps {

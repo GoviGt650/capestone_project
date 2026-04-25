@@ -2,7 +2,7 @@ services:
 
   mysql:
     image: mysql:8
-    ...
+   
 
   fastapi:
     image: ${ECR}:fastapi
