@@ -1,10 +1,11 @@
 FROM nginx:latest
 
-# Remove default config
 RUN rm /etc/nginx/conf.d/default.conf
 
-# Copy your nginx config
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY frontend /usr/share/nginx/html
 
+
+# Remove default config
+# Copy your nginx config
 # Copy frontend files
-COPY ../frontend /usr/share/nginx/html
