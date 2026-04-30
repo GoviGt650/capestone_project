@@ -8,6 +8,24 @@ const avatarColors = [
   'bg-orange-500', 'bg-cyan-500', 'bg-emerald-500', 'bg-violet-500'
 ];
 
+let currentRoute = "round";
+
+function updateAPI(route) {
+  currentRoute = route;
+
+  // 🔥 Save in localStorage
+  localStorage.setItem("selectedRoute", route);
+
+  API = window.ROUTES[route];
+
+  console.log("🔁 Switched route:", route);
+  console.log("🌐 New API:", API);
+
+  showSuccess(`Switched to ${route.toUpperCase()} backend`);
+
+  getUsers();
+}
+
 // Store current users for duplicate checking
 let currentUsers = [];
 
@@ -392,10 +410,15 @@ async function getUsers() {
     
     currentUsers = users;
     
-    const userCount = document.getElementById("userCount");
-    if (userCount) {
-      userCount.innerText = users.length;
-    }
+const userCount = document.getElementById("userCount");
+const userCountBadge = document.getElementById("userCountBadge");
+
+if (userCount) {
+  userCount.innerText = users.length;
+}
+if (userCountBadge) {
+  userCountBadge.innerText = users.length + " users";
+}
     
     userList.innerHTML = "";
 
@@ -658,6 +681,29 @@ function setupEventListeners() {
     refreshBtn.addEventListener("click", getUsers);
   }
 
+
+
+
+
+
+  // Routing buttons
+  document.querySelectorAll(".route-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const route = btn.getAttribute("data-route");
+
+      // Update UI active state
+      document.querySelectorAll(".route-btn").forEach(b => {
+        b.classList.remove("btn-primary");
+        b.classList.add("btn-secondary");
+      });
+
+      btn.classList.remove("btn-secondary");
+      btn.classList.add("btn-primary");
+
+      updateAPI(route);
+    });
+  });
+
   // Enter key handlers
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
@@ -683,11 +729,32 @@ function setupEventListeners() {
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log("📄 Page loaded");
+
+  // 🔥 Load saved route (or default to round robin)
+  const savedRoute = localStorage.getItem("selectedRoute") || "round";
+  currentRoute = savedRoute;
+  API = window.ROUTES[savedRoute];
+
   console.log("🌐 API Base:", API);
-  
+
   // Setup all event listeners
   setupEventListeners();
-  
+
+  // 🔥 Update active button UI based on saved route
+  setTimeout(() => {
+    document.querySelectorAll(".route-btn").forEach(btn => {
+      const route = btn.getAttribute("data-route");
+
+      if (route === currentRoute) {
+        btn.classList.remove("btn-secondary");
+        btn.classList.add("btn-primary");
+      } else {
+        btn.classList.remove("btn-primary");
+        btn.classList.add("btn-secondary");
+      }
+    });
+  }, 100);
+
   // Check authentication
   const isAuthenticated = localStorage.getItem("auth") === "true";
   if (isAuthenticated) {

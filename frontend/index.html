@@ -2,301 +2,394 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Management Dashboard | Enterprise</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>User Management | Enterprise Suite</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <style>
     * {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     body {
-      background: #0A0C10;
-      background-image: radial-gradient(circle at 25% 0%, rgba(30, 100, 200, 0.05) 0%, transparent 50%);
+      background: #0f172a;
+      background-image: 
+        linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, transparent 50%),
+        linear-gradient(225deg, rgba(236, 72, 153, 0.02) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 30%, rgba(139, 92, 246, 0.04) 0%, transparent 60%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
     }
 
-    /* Professional glass effect */
+    /* Distinct glass card - more opaque with colorful borders */
     .glass-card {
-      background: rgba(18, 22, 28, 0.95);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(55, 65, 81, 0.5);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 0 0 1px rgba(139, 92, 246, 0.1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Smooth transitions */
+    .glass-card:hover {
+      border-color: rgba(129, 140, 248, 0.35);
+      box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 0 0 1px rgba(167, 139, 250, 0.15);
+    }
+
     .transition-smooth {
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Input focus effect */
     .input-focus:focus {
       outline: none;
-      border-color: #3B82F6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      border-color: #8b5cf6;
+      box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15), 0 0 20px rgba(139, 92, 246, 0.1);
     }
 
-    /* Button hover effects */
+    /* New button style - purple gradient */
     .btn-primary {
-      background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-      transition: all 0.2s ease;
+      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-primary:hover::before {
+      left: 100%;
     }
 
     .btn-primary:hover {
-      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
-      transform: translateY(-1px);
-      box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.5);
+      border-color: rgba(167, 139, 250, 0.6);
     }
 
     .btn-secondary {
-      background: rgba(55, 65, 81, 0.5);
-      border: 1px solid rgba(75, 85, 99, 0.5);
-      transition: all 0.2s ease;
+      background: rgba(51, 65, 85, 0.6);
+      border: 1px solid rgba(100, 116, 139, 0.4);
+      transition: all 0.25s ease;
     }
 
     .btn-secondary:hover {
-      background: rgba(55, 65, 81, 0.7);
-      border-color: rgba(107, 114, 128, 0.7);
+      background: rgba(71, 85, 105, 0.8);
+      border-color: rgba(148, 163, 184, 0.6);
       transform: translateY(-1px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
 
-    /* User list item animation */
+    /* User item animation - different style */
     .user-item {
-      animation: fadeInUp 0.3s ease forwards;
+      animation: slideInLeft 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
       opacity: 0;
+      transform: translateX(-20px);
     }
 
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
+    @keyframes slideInLeft {
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
       }
     }
 
-    /* Hover effect for list items */
     .user-item-hover {
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
+      border-left: 3px solid transparent;
+      background: linear-gradient(90deg, transparent 0%, rgba(139, 92, 246, 0.02) 100%);
     }
 
     .user-item-hover:hover {
-      background: rgba(59, 130, 246, 0.05);
-      border-color: rgba(59, 130, 246, 0.3);
-      transform: translateX(4px);
+      background: linear-gradient(90deg, rgba(139, 92, 246, 0.08) 0%, rgba(236, 72, 153, 0.04) 100%);
+      border-left-color: #8b5cf6;
+      transform: translateX(6px);
     }
 
-    /* Delete button hover */
     .delete-btn {
       transition: all 0.2s ease;
+      color: rgba(248, 113, 113, 0.7);
     }
 
     .delete-btn:hover {
-      color: #EF4444;
-      transform: scale(1.05);
+      color: #f87171;
+      transform: scale(1.15) rotate(5deg);
+      filter: drop-shadow(0 0 8px rgba(248, 113, 113, 0.5));
     }
 
-    /* Toast animations */
     @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      0% { opacity: 0; transform: translateY(-30px) scale(0.95); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .toast-show {
-      animation: slideDown 0.3s ease forwards;
+      animation: slideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
 
-    /* Scrollbar */
+    /* Different scrollbar style */
     ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+      width: 5px;
     }
 
     ::-webkit-scrollbar-track {
-      background: rgba(31, 41, 55, 0.5);
-      border-radius: 4px;
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 10px;
     }
 
     ::-webkit-scrollbar-thumb {
-      background: rgba(75, 85, 99, 0.8);
-      border-radius: 4px;
+      background: linear-gradient(180deg, #7c3aed, #ec4899);
+      border-radius: 10px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: rgba(107, 114, 128, 0.8);
+      background: linear-gradient(180deg, #8b5cf6, #f472b6);
     }
 
-    /* Loading spinner */
     .spinner {
-      border: 2px solid rgba(59, 130, 246, 0.2);
-      border-top-color: #3B82F6;
+      border: 2px solid rgba(139, 92, 246, 0.2);
+      border-top-color: #8b5cf6;
       border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      animation: spin 0.6s linear infinite;
+      width: 22px;
+      height: 22px;
+      animation: spin 0.8s linear infinite;
     }
 
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
 
-    /* Status badge */
+    /* Status badge - different color scheme */
     .status-badge {
-      background: rgba(34, 197, 94, 0.1);
-      color: #22C55E;
-      border: 1px solid rgba(34, 197, 94, 0.2);
+      background: rgba(34, 197, 94, 0.08);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
     }
 
-    /* Professional card shadow */
-    .card-shadow {
-      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    .animate-fade-in {
+      animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    /* Modal animations */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.9); }
       to { opacity: 1; transform: scale(1); }
     }
-    
-    .animate-fade-in {
-      animation: fadeIn 0.2s ease-out;
+
+    .scale-110 {
+      transform: scale(1.15);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    /* Count animation */
-    .scale-110 {
-      transform: scale(1.1);
-      transition: transform 0.2s ease;
+    /* New logo style */
+    .logo-container {
+      background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(236, 72, 153, 0.15);
+    }
+
+    /* Route button active state */
+    .route-btn.active-route {
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+      border-color: #a78bfa;
+      box-shadow: 0 6px 20px -5px rgba(124, 58, 237, 0.6);
+      color: white;
+    }
+
+    /* Card hover elevation effect */
+    .elevate-hover {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .elevate-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Pulse animation for online indicator */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .pulse-dot {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
   </style>
 </head>
-
-<body class="min-h-screen flex items-center justify-center p-6">
-
-  <!-- 🔐 LOGIN PAGE -->
-  <div id="loginPage" class="w-full max-w-md">
-    <div class="glass-card rounded-2xl p-8">
-      <!-- Logo/Brand -->
-      <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 mb-4">
-          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-          </svg>
-        </div>
-        <h2 class="text-2xl font-semibold text-white mb-2">Welcome back</h2>
-        <p class="text-sm text-gray-400">Sign in to access the dashboard</p>
-      </div>
-
-      <!-- Form -->
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Username</label>
-          <input id="loginUser" 
-                 type="text"
-                 placeholder="Enter your username"
-                 class="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 input-focus transition-smooth">
-        </div>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-          <input id="loginPass" 
-                 type="password"
-                 placeholder="Enter your password"
-                 class="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 input-focus transition-smooth">
+<body class="min-h-screen flex items-center justify-center p-4 md:p-6">
+  
+  <!-- 🔐 LOGIN PAGE - Distinct design with geometric patterns -->
+  <div id="loginPage" class="w-full max-w-md transition-all duration-500">
+    <div class="glass-card rounded-3xl p-8 relative overflow-hidden">
+      <!-- Geometric decorative elements -->
+      <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-purple-500/10 to-pink-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+      <div class="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-violet-600/10 to-fuchsia-600/8 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2"></div>
+      <div class="absolute top-1/2 right-0 w-24 h-24 border border-purple-500/10 rounded-full -translate-y-1/2 translate-x-1/3"></div>
+      
+      <div class="relative">
+        <!-- Different logo style - diamond shape -->
+        <div class="text-center mb-8">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl logo-container mb-5 transform rotate-45">
+            <svg class="w-8 h-8 text-white transform -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-semibold text-white mb-1.5 tracking-tight">Portal Access</h2>
+          <p class="text-sm text-gray-400">Authenticate to continue</p>
         </div>
 
-        <button id="loginBtn"
-                class="btn-primary w-full py-2.5 rounded-lg font-medium text-white transition-smooth">
-          Sign in
-        </button>
-
-        <div id="loginError" class="hidden mt-4 p-3 bg-red-500 bg-opacity-10 border border-red-500 border-opacity-20 rounded-lg text-red-400 text-sm"></div>
-        
-        <div class="pt-4 text-center">
-          <p class="text-xs text-gray-500">Demo credentials: <span class="text-gray-400 font-mono">admin / admin</span></p>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1.5">Username</label>
+            <input id="loginUser" type="text" placeholder="admin" class="w-full px-4 py-3 bg-slate-800/80 border border-slate-700/60 rounded-2xl text-white placeholder-gray-500 input-focus transition-smooth">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1.5">Password</label>
+            <input id="loginPass" type="password" placeholder="••••••••" class="w-full px-4 py-3 bg-slate-800/80 border border-slate-700/60 rounded-2xl text-white placeholder-gray-500 input-focus transition-smooth">
+          </div>
+          <button id="loginBtn" class="btn-primary w-full py-3 rounded-2xl font-semibold text-white transition-smooth mt-3 text-base">
+            Authenticate
+          </button>
+          <div id="loginError" class="hidden mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm"></div>
+          <div class="pt-3 text-center">
+            <p class="text-xs text-gray-500">Credentials: <span class="text-gray-400 font-mono bg-slate-800/50 px-3 py-1 rounded-lg">admin / admin</span></p>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- 🟢 MAIN APP DASHBOARD -->
-  <div id="app" class="hidden w-full max-w-4xl">
-    <!-- Header -->
-    <div class="mb-6">
-      <div class="flex justify-between items-center">
-        <div>
-          <h1 class="text-2xl font-semibold text-white mb-1">User Management</h1>
-          <p class="text-sm text-gray-400">Manage and monitor user accounts</p>
-        </div>
-        <div class="flex items-center gap-3">
-          <div class="text-right">
-            <p class="text-xs text-gray-400">Signed in as</p>
-            <p class="text-sm font-medium text-white">Administrator</p>
-          </div>
-          <button id="logoutBtn" class="p-2 hover:bg-gray-800 rounded-lg transition-smooth">
-            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Stats Card -->
-    <div class="glass-card rounded-xl p-6 mb-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm text-gray-400 mb-1">Total Users</p>
-          <h3 id="userCount" class="text-3xl font-bold text-white transition-transform">0</h3>
-        </div>
-        <div class="status-badge px-3 py-1 rounded-full text-xs font-medium">
-          Active System
-        </div>
-      </div>
-    </div>
-
-    <!-- Add User Section -->
-    <div class="glass-card rounded-xl p-6 mb-6">
-      <h3 class="text-lg font-medium text-white mb-4">Add New User</h3>
-      <div class="flex gap-3">
-        <input id="username"
-               type="text"
-               placeholder="Enter username"
-               class="flex-1 px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 input-focus transition-smooth">
-        <button id="addUserBtn"
-                class="btn-primary px-6 py-2.5 rounded-lg font-medium text-white transition-smooth flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+  <div id="app" class="hidden w-full max-w-5xl transition-all duration-500">
+    <!-- Header with sleek design -->
+    <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl logo-container flex items-center justify-center transform rotate-3">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
           </svg>
-          Add User
+        </div>
+        <div>
+          <h1 class="text-2xl font-semibold text-white tracking-tight">User Management</h1>
+          <p class="text-sm text-gray-400 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 bg-purple-500 rounded-full pulse-dot"></span>
+            System Dashboard
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="text-right hidden sm:block bg-slate-800/50 px-4 py-2 rounded-2xl border border-slate-700/50">
+          <p class="text-xs text-gray-400">Signed in as</p>
+          <p class="text-sm font-medium text-white">Administrator</p>
+        </div>
+        <button id="logoutBtn" class="p-2.5 hover:bg-red-500/10 rounded-2xl transition-smooth border border-slate-700/50 hover:border-red-500/30 group">
+          <svg class="w-5 h-5 text-gray-400 group-hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+          </svg>
         </button>
       </div>
     </div>
 
-    <!-- Users List Section -->
-    <div class="glass-card rounded-xl overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-800">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-medium text-white">User Directory</h3>
-          <button id="refreshBtn"
-                  class="btn-secondary px-4 py-1.5 rounded-lg text-sm font-medium text-gray-300 transition-smooth flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            Refresh
-          </button>
+    <!-- Stats Card with gradient accent -->
+    <div class="glass-card rounded-2xl p-6 mb-8 flex flex-wrap items-center justify-between gap-4 elevate-hover">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center border border-purple-500/20">
+          <svg class="w-7 h-7 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm text-gray-400 uppercase tracking-wider text-xs">Total Users</p>
+          <h3 id="userCount" class="text-4xl font-bold text-white transition-all duration-300 bg-gradient-to-r from-white to-gray-300 bg-clip-text">0</h3>
         </div>
       </div>
-      
-      <div class="divide-y divide-gray-800 max-h-96 overflow-y-auto">
-        <ul id="userList" class="divide-y divide-gray-800"></ul>
+      <div class="status-badge px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-green-400 pulse-dot"></span>
+        ACTIVE SYSTEM
+      </div>
+    </div>
+
+    <!-- Routing Mode Card - chip style -->
+    <div class="glass-card rounded-2xl p-5 mb-8">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+          <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+          </svg>
+        </div>
+        <h3 class="text-sm font-medium text-gray-300 uppercase tracking-wider">Routing Mode</h3>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button class="route-btn btn-primary px-5 py-2.5 rounded-2xl text-sm font-medium" data-route="round">Round Robin</button>
+        <button class="route-btn btn-secondary px-5 py-2.5 rounded-2xl text-sm font-medium text-gray-300" data-route="fastapi">FastAPI</button>
+        <button class="route-btn btn-secondary px-5 py-2.5 rounded-2xl text-sm font-medium text-gray-300" data-route="django">Django</button>
+        <button class="route-btn btn-secondary px-5 py-2.5 rounded-2xl text-sm font-medium text-gray-300" data-route="node">Node.js</button>
+        <button class="route-btn btn-secondary px-5 py-2.5 rounded-2xl text-sm font-medium text-gray-300" data-route="dotnet">.NET</button>
+      </div>
+    </div>
+
+    <!-- Add User Section - highlighted card -->
+    <div class="glass-card rounded-2xl p-6 mb-8 border-purple-500/30">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-white">Register User</h3>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input id="username" type="text" placeholder="Username to register" class="flex-1 px-5 py-3.5 bg-slate-800/80 border border-slate-700/60 rounded-2xl text-white placeholder-gray-500 input-focus transition-smooth">
+        <button id="addUserBtn" class="btn-primary px-7 py-3.5 rounded-2xl font-semibold text-white transition-smooth flex items-center justify-center gap-2 text-base">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Register
+        </button>
+      </div>
+    </div>
+
+    <!-- User Directory Card - table style -->
+    <div class="glass-card rounded-2xl overflow-hidden">
+      <div class="px-6 py-5 border-b border-slate-700/50 flex items-center justify-between bg-slate-800/30">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-slate-700/50 flex items-center justify-center">
+            <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white">Directory</h3>
+          <span class="text-xs text-gray-500 bg-slate-700/50 px-2 py-1 rounded-lg" id="userCountBadge">0 users</span>
+        </div>
+        <button id="refreshBtn" class="btn-secondary px-4 py-2 rounded-2xl text-sm font-medium text-gray-300 transition-smooth flex items-center gap-2 group">
+          <svg class="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          Refresh
+        </button>
+      </div>
+      <div class="divide-y divide-slate-700/50 max-h-96 overflow-y-auto">
+        <ul id="userList" class="divide-y divide-slate-700/50"></ul>
       </div>
     </div>
   </div>
@@ -305,9 +398,7 @@
   <div id="errorCard" class="hidden fixed top-4 right-4 z-50"></div>
   <div id="successCard" class="hidden fixed top-4 right-4 z-50"></div>
 
-  <!-- Scripts -->
   <script src="config.js"></script>
   <script src="script.js"></script>
-
 </body>
 </html>

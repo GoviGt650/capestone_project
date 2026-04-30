@@ -2,8 +2,7 @@ services:
 
   mysql:
     image: mysql:8
-   
-
+    
   fastapi:
     image: ${ECR}:fastapi
 
@@ -17,6 +16,8 @@ services:
     image: ${ECR}:dotnet
 
   nginx:
-    image: ${ECR}:nginx
+    image: nginx:alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
       - "80:80"
