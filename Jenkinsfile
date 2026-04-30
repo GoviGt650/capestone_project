@@ -60,19 +60,14 @@ pipeline {
             steps {
                 sshagent(['ec2-ssh-key']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP << EOF
-                    set -e
-
-                    cd ~
-
-                    ./load-secrets.sh
-
-                    docker compose pull
-                    docker compose up -d --remove-orphans
-
-                    echo "🚀 Deployment successful"
-
-        EOF
+                    ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP "
+                        set -e &&
+                        cd ~ &&
+                        ./load-secrets.sh &&
+                        docker compose pull &&
+                        docker compose up -d --remove-orphans &&
+                        echo 🚀 Deployment successful
+                    "
                     '''
                 }
             }
