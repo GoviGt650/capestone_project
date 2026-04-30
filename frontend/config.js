@@ -1,14 +1,11 @@
-window.BASE_URL = "http://backend-alb-943964116.eu-north-1.elb.amazonaws.com";
+window.BASE_URL = "";
 
-// Default → Round Robin
-window.API = `${window.BASE_URL}/api`;
+window.API = `/api`;
 
 window.ROUTES = {
-  round: `${window.BASE_URL}/api`,
-  fastapi: `${window.BASE_URL}/fastapi`,
-  django: `${window.BASE_URL}/django`,
-  node: `${window.BASE_URL}/node`,
-  dotnet: `${window.BASE_URL}/dotnet`
+  round: `/api`,
+  fastapi: `/api/fastapi`,
+  django: `/api/django`,
+  node: `/api/node`,
+  dotnet: `/api/dotnet`
 };
-
-console.log("🌐 API configured:", window.API);

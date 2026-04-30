@@ -1,5 +1,5 @@
 // Global API variable from config.js
-let API = window.API || "http://localhost:8081/api";
+let API = window.API || "/api";
 
 // Array of vibrant colors for avatars
 const avatarColors = [
