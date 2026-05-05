@@ -63,6 +63,7 @@ pipeline {
                     ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP "
                         set -e &&
                         cd ~ &&
+                        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com &&
                         ./load-secrets.sh &&
                         docker compose pull &&
                         docker compose up -d --remove-orphans &&
