@@ -60,6 +60,7 @@ pipeline {
                     scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@$EC2_IP:~/docker-compose.yml
                     scp -o StrictHostKeyChecking=no load-secrets.sh ubuntu@$EC2_IP:~/load-secrets.sh
                     scp -o StrictHostKeyChecking=no nginx/nginx.conf ubuntu@$EC2_IP:~/nginx/nginx.conf
+                    scp -o StrictHostKeyChecking=no fix-blackbox.sh ubuntu@$EC2_IP:~/fix-blackbox.sh
                     scp -o StrictHostKeyChecking=no monitoring/prometheus.yml ubuntu@$EC2_IP:~/monitoring/prometheus.yml
                     scp -o StrictHostKeyChecking=no monitoring/alerts.yml ubuntu@$EC2_IP:~/monitoring/alerts.yml
                     scp -o StrictHostKeyChecking=no monitoring/datasources.yml ubuntu@$EC2_IP:~/monitoring/datasources.yml
@@ -85,6 +86,7 @@ pipeline {
                         docker compose up -d --remove-orphans &&
                         sleep 10 &&
                         docker compose restart nginx &&
+                        ./fix-blackbox.sh &&
                         echo 🚀 Deployment successful
                     "
                     '''
