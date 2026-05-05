@@ -56,6 +56,25 @@ pipeline {
             }
         }
 
+        stage('Copy Configs to EC2') {
+            steps {
+                sshagent(['ec2-ssh-key']) {
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP "mkdir -p ~/monitoring/blackbox ~/nginx"
+                    scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@$EC2_IP:~/docker-compose.yml
+                    scp -o StrictHostKeyChecking=no load-secrets.sh ubuntu@$EC2_IP:~/load-secrets.sh
+                    scp -o StrictHostKeyChecking=no nginx/nginx.conf ubuntu@$EC2_IP:~/nginx/nginx.conf
+                    scp -o StrictHostKeyChecking=no monitoring/prometheus.yml ubuntu@$EC2_IP:~/monitoring/prometheus.yml
+                    scp -o StrictHostKeyChecking=no monitoring/alerts.yml ubuntu@$EC2_IP:~/monitoring/alerts.yml
+                    scp -o StrictHostKeyChecking=no monitoring/datasources.yml ubuntu@$EC2_IP:~/monitoring/datasources.yml
+                    scp -o StrictHostKeyChecking=no monitoring/dashboard-provider.yml ubuntu@$EC2_IP:~/monitoring/dashboard-provider.yml
+                    scp -o StrictHostKeyChecking=no monitoring/comprehensive-dashboard.json ubuntu@$EC2_IP:~/monitoring/comprehensive-dashboard.json
+                    scp -o StrictHostKeyChecking=no monitoring/blackbox/blackbox.yml ubuntu@$EC2_IP:~/monitoring/blackbox/blackbox.yml
+                    '''
+                }
+            }
+        }
+
         stage('Deploy to Private EC2') {
             steps {
                 sshagent(['ec2-ssh-key']) {
