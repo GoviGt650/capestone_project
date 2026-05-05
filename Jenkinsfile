@@ -48,10 +48,6 @@ pipeline {
                 docker build -t dotnet ./backend/dotnet-app
                 docker tag dotnet:latest $ECR:dotnet
                 docker push $ECR:dotnet
-
-                docker build -t nginx -f nginx/Dockerfile .
-                docker tag nginx:latest $ECR:nginx
-                docker push $ECR:nginx
                 '''
             }
         }
@@ -103,7 +99,7 @@ pipeline {
                     ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP "
                         cd ~ &&
                         sudo mkdir -p /var/log/db-migration &&
-                        python3 database/db_migration.py || echo '⚠️ Migration skipped or failed'
+                        python3 database/db_migration.py || echo '⚠️ Migration skipped'
                     "
                     '''
                 }
