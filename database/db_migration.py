@@ -11,7 +11,7 @@ from pathlib import Path
 PRIMARY_DB = {
     'host': 'users-db.c1wo0oqs2zrs.eu-north-1.rds.amazonaws.com',
     'port': '3306',
-    'name': 'mydb',
+    'name': 'users_db',
     'user': 'govi',
     'password': 'admin123',
 }
@@ -19,7 +19,7 @@ PRIMARY_DB = {
 SECONDARY_DB = {
     'host': 'users-db-backup.c1wo0oqs2zrs.eu-north-1.rds.amazonaws.com',
     'port': '3306',
-    'name': 'mydb',
+    'name': 'users_db',
     'user': 'govi',
     'password': 'admin123',
 }
@@ -59,13 +59,30 @@ class MySQLMigrator:
             logger.error(f"❌ {name} connection error: {str(e)}")
             return False
     
+    def create_database_if_not_exists(self, db_config):
+        try:
+            cmd = ['mysql', '-h', db_config['host'], '-P', str(db_config['port']),
+                   '-u', db_config['user'], f"-p{db_config['password']}",
+                   '-e', f"CREATE DATABASE IF NOT EXISTS {db_config['name']};"]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            if result.returncode == 0:
+                logger.info(f"✅ Database '{db_config['name']}' ready on {db_config['host']}")
+                return True
+            else:
+                logger.error(f"❌ Create DB failed: {result.stderr}")
+                return False
+        except Exception as e:
+            logger.error(f"❌ Create DB error: {str(e)}")
+            return False
+    
     def dump_database(self):
         logger.info(f"📦 Dumping Primary DB: {PRIMARY_DB['host']}")
         try:
             cmd = ['mysqldump', '-h', PRIMARY_DB['host'], '-P', str(PRIMARY_DB['port']),
                    '-u', PRIMARY_DB['user'], f"-p{PRIMARY_DB['password']}",
-                   '--single-transaction', '--quick', '--lock-tables=false',
-                   '--routines', '--triggers', '--events', PRIMARY_DB['name']]
+                   '--skip-lock-tables', '--no-tablespaces', '--column-statistics=0',
+                   '--set-gtid-purged=OFF', '--routines', '--triggers', '--events',
+                   PRIMARY_DB['name']]
             with open(self.dump_file, 'w') as f:
                 result = subprocess.run(cmd, stdout=f, stderr=subprocess.PIPE, text=True, timeout=3600)
             if result.returncode == 0:
@@ -119,6 +136,9 @@ class MySQLMigrator:
         
         if not self.test_connection(PRIMARY_DB, "Primary"): sys.exit(1)
         if not self.test_connection(SECONDARY_DB, "Secondary"): sys.exit(1)
+        
+        self.create_database_if_not_exists(SECONDARY_DB)
+        
         if not self.dump_database(): sys.exit(1)
         if not self.restore_database(): sys.exit(1)
         self.cleanup()
