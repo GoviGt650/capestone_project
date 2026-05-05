@@ -16,22 +16,22 @@
         "gridPos": {"h": 3, "w": 24, "x": 0, "y": 0},
         "targets": [
           {
-            "expr": "probe_success{framework=\"fastapi\"}",
+            "expr": "max(probe_success{framework=\"fastapi\"})",
             "legendFormat": "FastAPI",
             "refId": "A"
           },
           {
-            "expr": "probe_success{framework=\"django\"}",
+            "expr": "max(probe_success{framework=\"django\"})",
             "legendFormat": "Django",
             "refId": "B"
           },
           {
-            "expr": "probe_success{framework=\"node\"}",
+            "expr": "max(probe_success{framework=\"node\"})",
             "legendFormat": "Node",
             "refId": "C"
           },
           {
-            "expr": "probe_success{framework=\"dotnet\"}",
+            "expr": "max(probe_success{framework=\"dotnet\"})",
             "legendFormat": "Dotnet",
             "refId": "D"
           }
@@ -256,12 +256,7 @@
             "refId": "D"
           }
         ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "s",
-            "decimals": 4
-          }
-        },
+        "fieldConfig": {"defaults": {"unit": "s", "decimals": 4}},
         "options": {
           "legend": {
             "displayMode": "table",
@@ -277,22 +272,22 @@
         "gridPos": {"h": 6, "w": 12, "x": 0, "y": 37},
         "targets": [
           {
-            "expr": "(1 - probe_success{framework=\"fastapi\"}) * 100",
+            "expr": "(1 - max(probe_success{framework=\"fastapi\"})) * 100",
             "legendFormat": "FastAPI",
             "refId": "A"
           },
           {
-            "expr": "(1 - probe_success{framework=\"django\"}) * 100",
+            "expr": "(1 - max(probe_success{framework=\"django\"})) * 100",
             "legendFormat": "Django",
             "refId": "B"
           },
           {
-            "expr": "(1 - probe_success{framework=\"node\"}) * 100",
+            "expr": "(1 - max(probe_success{framework=\"node\"})) * 100",
             "legendFormat": "Node",
             "refId": "C"
           },
           {
-            "expr": "(1 - probe_success{framework=\"dotnet\"}) * 100",
+            "expr": "(1 - max(probe_success{framework=\"dotnet\"})) * 100",
             "legendFormat": "Dotnet",
             "refId": "D"
           }
