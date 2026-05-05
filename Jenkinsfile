@@ -60,7 +60,7 @@ pipeline {
             steps {
                 sshagent(['ec2-ssh-key']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP "mkdir -p ~/monitoring/blackbox ~/nginx"
+                    ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP "mkdir -p ~/monitoring/blackbox ~/nginx ~/database"
                     scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@$EC2_IP:~/docker-compose.yml
                     scp -o StrictHostKeyChecking=no load-secrets.sh ubuntu@$EC2_IP:~/load-secrets.sh
                     scp -o StrictHostKeyChecking=no nginx/nginx.conf ubuntu@$EC2_IP:~/nginx/nginx.conf
@@ -70,6 +70,7 @@ pipeline {
                     scp -o StrictHostKeyChecking=no monitoring/dashboard-provider.yml ubuntu@$EC2_IP:~/monitoring/dashboard-provider.yml
                     scp -o StrictHostKeyChecking=no monitoring/comprehensive-dashboard.json ubuntu@$EC2_IP:~/monitoring/comprehensive-dashboard.json
                     scp -o StrictHostKeyChecking=no monitoring/blackbox/blackbox.yml ubuntu@$EC2_IP:~/monitoring/blackbox/blackbox.yml
+                    scp -o StrictHostKeyChecking=no database/db_migration.py ubuntu@$EC2_IP:~/database/db_migration.py
                     '''
                 }
             }
@@ -86,7 +87,23 @@ pipeline {
                         ./load-secrets.sh &&
                         docker compose pull &&
                         docker compose up -d --remove-orphans &&
+                        sleep 10 &&
+                        docker compose restart nginx &&
                         echo 🚀 Deployment successful
+                    "
+                    '''
+                }
+            }
+        }
+
+        stage('Run DB Migration') {
+            steps {
+                sshagent(['ec2-ssh-key']) {
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP "
+                        cd ~ &&
+                        sudo mkdir -p /var/log/db-migration &&
+                        python3 database/db_migration.py || echo '⚠️ Migration skipped or failed'
                     "
                     '''
                 }
