@@ -35,19 +35,27 @@ pipeline {
                 sh '''
                 docker build -t node ./backend/node-app
                 docker tag node:latest $ECR:node
+                docker tag node:latest $ECR:node-${BUILD_NUMBER}
                 docker push $ECR:node
+                docker push $ECR:node-${BUILD_NUMBER}
 
                 docker build -t django ./backend/django-app
                 docker tag django:latest $ECR:django
+                docker tag django:latest $ECR:django-${BUILD_NUMBER}
                 docker push $ECR:django
+                docker push $ECR:django-${BUILD_NUMBER}
 
                 docker build -t fastapi ./backend/fastapi-app
                 docker tag fastapi:latest $ECR:fastapi
+                docker tag fastapi:latest $ECR:fastapi-${BUILD_NUMBER}
                 docker push $ECR:fastapi
+                docker push $ECR:fastapi-${BUILD_NUMBER}
 
                 docker build -t dotnet ./backend/dotnet-app
                 docker tag dotnet:latest $ECR:dotnet
+                docker tag dotnet:latest $ECR:dotnet-${BUILD_NUMBER}
                 docker push $ECR:dotnet
+                docker push $ECR:dotnet-${BUILD_NUMBER}
                 '''
             }
         }
@@ -87,7 +95,7 @@ pipeline {
                         sleep 10 &&
                         docker compose restart nginx &&
                         ./fix-blackbox.sh &&
-                        echo 🚀 Deployment successful
+                        echo 🚀 Deployed Build: ${BUILD_NUMBER}
                     "
                     '''
                 }
@@ -106,6 +114,15 @@ pipeline {
                     '''
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Build ${BUILD_NUMBER} deployed successfully!"
+        }
+        failure {
+            echo "❌ Build ${BUILD_NUMBER} failed!"
         }
     }
 }
