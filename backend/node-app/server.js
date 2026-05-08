@@ -97,5 +97,5 @@ app.delete("/users/:id", (req, res) => {
 });
 
 app.listen(8003, "0.0.0.0", () => {
-  console.log("🚀 Node running on port 8003");
+  console.log("🚀 Node is running on port 8003");
 });
