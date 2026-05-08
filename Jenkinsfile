@@ -39,11 +39,11 @@ pipeline {
 
             steps {
 
-                sh '''
-                aws ecr get-login-password --region $AWS_REGION \
+                sh """
+                aws ecr get-login-password --region ${AWS_REGION} \
                 | docker login --username AWS --password-stdin \
-                $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-                '''
+                ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                """
             }
         }
 
@@ -73,11 +73,11 @@ pipeline {
                             sh """
                             docker build -t ${service} ${path}
 
-                            docker tag ${service}:latest $ECR:${service}-latest
-                            docker tag ${service}:latest $ECR:${service}-${BUILD_NUMBER}
+                            docker tag ${service}:latest ${ECR}:${service}-latest
+                            docker tag ${service}:latest ${ECR}:${service}-${BUILD_NUMBER}
 
-                            docker push $ECR:${service}-latest
-                            docker push $ECR:${service}-${BUILD_NUMBER}
+                            docker push ${ECR}:${service}-latest
+                            docker push ${ECR}:${service}-${BUILD_NUMBER}
                             """
                         }
 
@@ -88,11 +88,11 @@ pipeline {
                         sh """
                         docker build -t ${params.SERVICE} ${path}
 
-                        docker tag ${params.SERVICE}:latest $ECR:${params.SERVICE}-latest
-                        docker tag ${params.SERVICE}:latest $ECR:${params.SERVICE}-${BUILD_NUMBER}
+                        docker tag ${params.SERVICE}:latest ${ECR}:${params.SERVICE}-latest
+                        docker tag ${params.SERVICE}:latest ${ECR}:${params.SERVICE}-${BUILD_NUMBER}
 
-                        docker push $ECR:${params.SERVICE}-latest
-                        docker push $ECR:${params.SERVICE}-${BUILD_NUMBER}
+                        docker push ${ECR}:${params.SERVICE}-latest
+                        docker push ${ECR}:${params.SERVICE}-${BUILD_NUMBER}
                         """
                     }
                 }
@@ -105,35 +105,35 @@ pipeline {
 
                 sshagent(['ec2-ssh-key']) {
 
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP "
+                    sh """
+                    ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
                         mkdir -p ~/monitoring/blackbox ~/nginx ~/database
-                    "
+                    '
 
-                    scp -o StrictHostKeyChecking=no docker-compose.app.yml ubuntu@$EC2_IP:~/docker-compose.app.yml
+                    scp -o StrictHostKeyChecking=no docker-compose.app.yml ubuntu@${EC2_IP}:~/docker-compose.app.yml
 
-                    scp -o StrictHostKeyChecking=no docker-compose.monitoring.yml ubuntu@$EC2_IP:~/docker-compose.monitoring.yml
+                    scp -o StrictHostKeyChecking=no docker-compose.monitoring.yml ubuntu@${EC2_IP}:~/docker-compose.monitoring.yml
 
-                    scp -o StrictHostKeyChecking=no load-secrets.sh ubuntu@$EC2_IP:~/load-secrets.sh
+                    scp -o StrictHostKeyChecking=no load-secrets.sh ubuntu@${EC2_IP}:~/load-secrets.sh
 
-                    scp -o StrictHostKeyChecking=no nginx/nginx.conf ubuntu@$EC2_IP:~/nginx/nginx.conf
+                    scp -o StrictHostKeyChecking=no nginx/nginx.conf ubuntu@${EC2_IP}:~/nginx/nginx.conf
 
-                    scp -o StrictHostKeyChecking=no fix-blackbox.sh ubuntu@$EC2_IP:~/fix-blackbox.sh
+                    scp -o StrictHostKeyChecking=no fix-blackbox.sh ubuntu@${EC2_IP}:~/fix-blackbox.sh
 
-                    scp -o StrictHostKeyChecking=no monitoring/prometheus.yml ubuntu@$EC2_IP:~/monitoring/prometheus.yml
+                    scp -o StrictHostKeyChecking=no monitoring/prometheus.yml ubuntu@${EC2_IP}:~/monitoring/prometheus.yml
 
-                    scp -o StrictHostKeyChecking=no monitoring/alerts.yml ubuntu@$EC2_IP:~/monitoring/alerts.yml
+                    scp -o StrictHostKeyChecking=no monitoring/alerts.yml ubuntu@${EC2_IP}:~/monitoring/alerts.yml
 
-                    scp -o StrictHostKeyChecking=no monitoring/datasources.yml ubuntu@$EC2_IP:~/monitoring/datasources.yml
+                    scp -o StrictHostKeyChecking=no monitoring/datasources.yml ubuntu@${EC2_IP}:~/monitoring/datasources.yml
 
-                    scp -o StrictHostKeyChecking=no monitoring/dashboard-provider.yml ubuntu@$EC2_IP:~/monitoring/dashboard-provider.yml
+                    scp -o StrictHostKeyChecking=no monitoring/dashboard-provider.yml ubuntu@${EC2_IP}:~/monitoring/dashboard-provider.yml
 
-                    scp -o StrictHostKeyChecking=no monitoring/comprehensive-dashboard.json ubuntu@$EC2_IP:~/monitoring/comprehensive-dashboard.json
+                    scp -o StrictHostKeyChecking=no monitoring/comprehensive-dashboard.json ubuntu@${EC2_IP}:~/monitoring/comprehensive-dashboard.json
 
-                    scp -o StrictHostKeyChecking=no monitoring/blackbox/blackbox.yml ubuntu@$EC2_IP:~/monitoring/blackbox/blackbox.yml
+                    scp -o StrictHostKeyChecking=no monitoring/blackbox/blackbox.yml ubuntu@${EC2_IP}:~/monitoring/blackbox/blackbox.yml
 
-                    scp -o StrictHostKeyChecking=no database/db_migration.py ubuntu@$EC2_IP:~/database/db_migration.py
-                    '''
+                    scp -o StrictHostKeyChecking=no database/db_migration.py ubuntu@${EC2_IP}:~/database/db_migration.py
+                    """
                 }
             }
         }
@@ -149,7 +149,7 @@ pipeline {
                         if (params.SERVICE == 'monitoring') {
 
                             sh """
-                            ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP '
+                            ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
 
                                 docker network create monitoring-net || true
 
@@ -166,15 +166,15 @@ pipeline {
                         } else if (params.SERVICE == 'all') {
 
                             sh """
-                            ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP '
+                            ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
 
                                 docker network create monitoring-net || true
 
                                 cd ~
 
-                                aws ecr get-login-password --region $AWS_REGION \
+                                aws ecr get-login-password --region ${AWS_REGION} \
                                 | docker login --username AWS --password-stdin \
-                                $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+                                ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
 
                                 chmod +x load-secrets.sh
 
@@ -199,15 +199,15 @@ pipeline {
                         } else {
 
                             sh """
-                            ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP '
+                            ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
 
                                 docker network create monitoring-net || true
 
                                 cd ~
 
-                                aws ecr get-login-password --region $AWS_REGION \
+                                aws ecr get-login-password --region ${AWS_REGION} \
                                 | docker login --username AWS --password-stdin \
-                                $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+                                ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
 
                                 chmod +x load-secrets.sh
 
@@ -242,17 +242,17 @@ pipeline {
 
                 sshagent(['ec2-ssh-key']) {
 
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP "
+                    sh """
+                    ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
 
                         cd ~
 
                         sudo mkdir -p /var/log/db-migration
 
                         python3 database/db_migration.py \
-                        || echo 'Migration skipped'
-                    "
-                    '''
+                        || echo "Migration skipped"
+                    '
+                    """
                 }
             }
         }
