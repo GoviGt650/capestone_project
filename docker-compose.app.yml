@@ -1,0 +1,71 @@
+services:
+
+  fastapi:
+    image: ${ECR}:fastapi-latest
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "8001:8001"
+    networks:
+      - monitoring-net
+
+  django:
+    image: ${ECR}:django-latest
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "8002:8002"
+    networks:
+      - monitoring-net
+
+  node:
+    image: ${ECR}:node-latest
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "8003:8003"
+    networks:
+      - monitoring-net
+
+  dotnet:
+    image: ${ECR}:dotnet-latest
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "8004:8004"
+    networks:
+      - monitoring-net
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - fastapi
+      - django
+      - node
+      - dotnet
+    networks:
+      - monitoring-net
+
+networks:
+  monitoring-net:
+    external: true
