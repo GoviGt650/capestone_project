@@ -1,155 +1,155 @@
-services:
+# services:
 
-  fastapi:
-    image: ${ECR}:fastapi
-    environment:
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-    ports:
-      - "8001:8001"
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+#   fastapi:
+#     image: ${ECR}:fastapi
+#     environment:
+#       - DB_HOST=${DB_HOST}
+#       - DB_PORT=${DB_PORT}
+#       - DB_NAME=${DB_NAME}
+#       - DB_USER=${DB_USER}
+#       - DB_PASSWORD=${DB_PASSWORD}
+#     ports:
+#       - "8001:8001"
+#     healthcheck:
+#       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+#       interval: 30s
+#       timeout: 5s
+#       retries: 3
 
-  django:
-    image: ${ECR}:django
-    environment:
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-    ports:
-      - "8002:8002"
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+#   django:
+#     image: ${ECR}:django
+#     environment:
+#       - DB_HOST=${DB_HOST}
+#       - DB_PORT=${DB_PORT}
+#       - DB_NAME=${DB_NAME}
+#       - DB_USER=${DB_USER}
+#       - DB_PASSWORD=${DB_PASSWORD}
+#     ports:
+#       - "8002:8002"
+#     healthcheck:
+#       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+#       interval: 30s
+#       timeout: 5s
+#       retries: 3
 
-  node:
-    image: ${ECR}:node
-    environment:
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-    ports:
-      - "8003:8003"
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:8003/health', res => { if (res.statusCode !== 200) process.exit(1); })"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+#   node:
+#     image: ${ECR}:node
+#     environment:
+#       - DB_HOST=${DB_HOST}
+#       - DB_PORT=${DB_PORT}
+#       - DB_NAME=${DB_NAME}
+#       - DB_USER=${DB_USER}
+#       - DB_PASSWORD=${DB_PASSWORD}
+#     ports:
+#       - "8003:8003"
+#     healthcheck:
+#       test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:8003/health', res => { if (res.statusCode !== 200) process.exit(1); })"]
+#       interval: 30s
+#       timeout: 5s
+#       retries: 3
 
-  dotnet:
-    image: ${ECR}:dotnet
-    environment:
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-    ports:
-      - "8004:8004"
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8004/health || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+#   dotnet:
+#     image: ${ECR}:dotnet
+#     environment:
+#       - DB_HOST=${DB_HOST}
+#       - DB_PORT=${DB_PORT}
+#       - DB_NAME=${DB_NAME}
+#       - DB_USER=${DB_USER}
+#       - DB_PASSWORD=${DB_PASSWORD}
+#     ports:
+#       - "8004:8004"
+#     healthcheck:
+#       test: ["CMD-SHELL", "curl -f http://localhost:8004/health || exit 1"]
+#       interval: 30s
+#       timeout: 5s
+#       retries: 3
 
-  nginx:
-    image: nginx:alpine
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    ports:
-      - "80:80"
-    depends_on:
-      fastapi:
-        condition: service_healthy
-      django:
-        condition: service_healthy
-      node:
-        condition: service_healthy
-      dotnet:
-        condition: service_healthy
+#   nginx:
+#     image: nginx:alpine
+#     volumes:
+#       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+#     ports:
+#       - "80:80"
+#     depends_on:
+#       fastapi:
+#         condition: service_healthy
+#       django:
+#         condition: service_healthy
+#       node:
+#         condition: service_healthy
+#       dotnet:
+#         condition: service_healthy
 
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus
-    volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./monitoring/alerts.yml:/etc/prometheus/alerts.yml
-    ports:
-      - "9090:9090"
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--web.external-url=http://backend-alb-943964116.eu-north-1.elb.amazonaws.com/prometheus"
-      - "--web.route-prefix=/"
-      - "--web.enable-lifecycle"
+#   prometheus:
+#     image: prom/prometheus
+#     container_name: prometheus
+#     volumes:
+#       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+#       - ./monitoring/alerts.yml:/etc/prometheus/alerts.yml
+#     ports:
+#       - "9090:9090"
+#     command:
+#       - "--config.file=/etc/prometheus/prometheus.yml"
+#       - "--web.external-url=http://backend-alb-943964116.eu-north-1.elb.amazonaws.com/prometheus"
+#       - "--web.route-prefix=/"
+#       - "--web.enable-lifecycle"
 
-  grafana:
-    image: grafana/grafana
-    container_name: grafana
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s/grafana/
-      - GF_SERVER_SERVE_FROM_SUB_PATH=true
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-    volumes:
-      - ./monitoring/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
-      - ./monitoring/dashboard-provider.yml:/etc/grafana/provisioning/dashboards/dashboard-provider.yml:ro
-      - ./monitoring/comprehensive-dashboard.json:/etc/grafana/provisioning/dashboards/comprehensive-dashboard.json:ro
+#   grafana:
+#     image: grafana/grafana
+#     container_name: grafana
+#     ports:
+#       - "3000:3000"
+#     environment:
+#       - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s/grafana/
+#       - GF_SERVER_SERVE_FROM_SUB_PATH=true
+#       - GF_AUTH_ANONYMOUS_ENABLED=true
+#       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+#     volumes:
+#       - ./monitoring/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+#       - ./monitoring/dashboard-provider.yml:/etc/grafana/provisioning/dashboards/dashboard-provider.yml:ro
+#       - ./monitoring/comprehensive-dashboard.json:/etc/grafana/provisioning/dashboards/comprehensive-dashboard.json:ro
 
-  node_exporter:
-    image: prom/node-exporter
-    container_name: node_exporter
-    ports:
-      - "9100:9100"
+#   node_exporter:
+#     image: prom/node-exporter
+#     container_name: node_exporter
+#     ports:
+#       - "9100:9100"
 
-  alertmanager:
-    image: prom/alertmanager
-    container_name: alertmanager
-    ports:
-      - "9093:9093"
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: cadvisor
-    ports:
-      - "8081:8080"
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
-    privileged: true
-    devices:
-      - /dev/kmsg
+#   alertmanager:
+#     image: prom/alertmanager
+#     container_name: alertmanager
+#     ports:
+#       - "9093:9093"
+#   cadvisor:
+#     image: gcr.io/cadvisor/cadvisor:latest
+#     container_name: cadvisor
+#     ports:
+#       - "8081:8080"
+#     volumes:
+#       - /:/rootfs:ro
+#       - /var/run:/var/run:ro
+#       - /sys:/sys:ro
+#       - /var/lib/docker/:/var/lib/docker:ro
+#       - /dev/disk/:/dev/disk:ro
+#     privileged: true
+#     devices:
+#       - /dev/kmsg
 
-  nginx-exporter:
-    image: nginx/nginx-prometheus-exporter:latest
-    container_name: nginx-exporter
-    ports:
-      - "9113:9113"
-    command:
-      - "-nginx.scrape-uri=http://nginx:80/nginx_status"
-    restart: always
+#   nginx-exporter:
+#     image: nginx/nginx-prometheus-exporter:latest
+#     container_name: nginx-exporter
+#     ports:
+#       - "9113:9113"
+#     command:
+#       - "-nginx.scrape-uri=http://nginx:80/nginx_status"
+#     restart: always
 
-  blackbox:
-    image: prom/blackbox-exporter:latest
-    container_name: blackbox
-    ports:
-      - "9115:9115"
-    volumes:
-      - ./monitoring/blackbox/blackbox.yml:/etc/blackbox/blackbox.yml:ro
-    command:
-      - "--config.file=/etc/blackbox/blackbox.yml"
+#   blackbox:
+#     image: prom/blackbox-exporter:latest
+#     container_name: blackbox
+#     ports:
+#       - "9115:9115"
+#     volumes:
+#       - ./monitoring/blackbox/blackbox.yml:/etc/blackbox/blackbox.yml:ro
+#     command:
+#       - "--config.file=/etc/blackbox/blackbox.yml"
