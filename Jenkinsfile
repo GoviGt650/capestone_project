@@ -110,12 +110,12 @@ pipeline {
                                     chmod +x load-secrets.sh
                                     ./load-secrets.sh
                                     
-                                    # STEP 1: Start monitoring first
-                                    docker compose -f docker-compose.monitoring.yml up -d --remove-orphans
+                                    # STEP 1: Start monitoring first (no remove-orphans)
+                                    docker compose -f docker-compose.monitoring.yml up -d
                                     sleep 10
                                     
-                                    # STEP 2: Start app services
-                                    docker compose -f docker-compose.app.yml up -d --remove-orphans
+                                    # STEP 2: Start app services (no remove-orphans)
+                                    docker compose -f docker-compose.app.yml up -d
                                     sleep 10
                                     
                                     # STEP 3: Fix blackbox
