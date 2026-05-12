@@ -146,10 +146,12 @@ pipeline {
                                 for svc in node django fastapi dotnet; do
                                     docker pull ${ECR}:\${svc}-${params.ROLLBACK_TAG}
                                     docker tag ${ECR}:\${svc}-${params.ROLLBACK_TAG} ${ECR}:\${svc}-latest
+                                    docker push ${ECR}:\${svc}-latest
                                 done
                             else
                                 docker pull ${ECR}:${params.SERVICE}-${params.ROLLBACK_TAG}
                                 docker tag ${ECR}:${params.SERVICE}-${params.ROLLBACK_TAG} ${ECR}:${params.SERVICE}-latest
+                                docker push ${ECR}:${params.SERVICE}-latest
                             fi
                             
                             docker compose -f docker-compose.monitoring.yml up -d
