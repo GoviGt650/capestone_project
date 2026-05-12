@@ -95,7 +95,7 @@ pipeline {
                             sh """
                                 ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
                                     cd ~
-                                    docker compose -f docker-compose.monitoring.yml up -d --remove-orphans
+                                    docker compose -f docker-compose.monitoring.yml up -d
                                     sleep 5
                                     ./fix-blackbox.sh
                                     echo "Monitoring Deployed"
@@ -152,8 +152,8 @@ pipeline {
                                 docker tag ${ECR}:${params.SERVICE}-${params.ROLLBACK_TAG} ${ECR}:${params.SERVICE}-latest
                             fi
                             
-                            docker compose -f docker-compose.monitoring.yml up -d --remove-orphans
-                            docker compose -f docker-compose.app.yml up -d --remove-orphans
+                            docker compose -f docker-compose.monitoring.yml up -d
+                            docker compose -f docker-compose.app.yml up -d
                             ./fix-blackbox.sh
                             echo "Rollback to ${params.ROLLBACK_TAG} Done"
                         '
