@@ -8,7 +8,7 @@ pipeline {
 
     parameters {
         choice(name: 'ACTION', choices: ['deploy', 'rollback'], description: 'Choose deployment action')
-        choice(name: 'SERVICE', choices: ['all', 'node', 'django', 'fastapi', 'dotnet', 'nginx', 'monitoring'], description: 'Select service')
+        choice(name: 'SERVICE', choices: ['all', 'node', 'django', 'fastapi', 'dotnet', 'monitoring'], description: 'Select service')
         string(name: 'ROLLBACK_TAG', defaultValue: '', description: 'Enter build number for rollback')
     }
 
@@ -39,7 +39,7 @@ pipeline {
         }
 
         stage('Build And Push Docker Images') {
-            when { expression { params.ACTION == 'deploy' && params.SERVICE != 'monitoring' && params.SERVICE != 'nginx' } }
+            when { expression { params.ACTION == 'deploy' && params.SERVICE != 'monitoring' } }
             steps {
                 script {
                     def services = [
@@ -95,10 +95,9 @@ pipeline {
                             sh """
                                 ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
                                     cd ~
-                                    docker compose -f docker-compose.monitoring.yml pull
                                     docker compose -f docker-compose.monitoring.yml up -d --remove-orphans
                                     sleep 5
-                                    docker compose -f docker-compose.monitoring.yml ps
+                                    ./fix-blackbox.sh
                                     echo "Monitoring Deployed"
                                 '
                             """
@@ -111,22 +110,20 @@ pipeline {
                                     chmod +x load-secrets.sh
                                     ./load-secrets.sh
                                     
-                                    # Start monitoring first
+                                    # STEP 1: Start monitoring first
                                     docker compose -f docker-compose.monitoring.yml up -d --remove-orphans
                                     sleep 10
                                     
-                                    # Start app services
-                                    docker compose -f docker-compose.app.yml pull ${params.SERVICE == 'all' ? '' : params.SERVICE}
-                                    docker compose -f docker-compose.app.yml up -d --remove-orphans ${params.SERVICE == 'all' ? '' : params.SERVICE}
+                                    # STEP 2: Start app services
+                                    docker compose -f docker-compose.app.yml up -d --remove-orphans
                                     sleep 10
                                     
-                                    # Restart nginx + fix blackbox
-                                    docker compose -f docker-compose.app.yml restart nginx
-                                    sleep 5
+                                    # STEP 3: Fix blackbox
                                     chmod +x fix-blackbox.sh
                                     ./fix-blackbox.sh
                                     
                                     docker compose -f docker-compose.app.yml ps
+                                    docker compose -f docker-compose.monitoring.yml ps
                                     echo "Deployed Build: ${BUILD_NUMBER}"
                                 '
                             """
@@ -155,8 +152,8 @@ pipeline {
                                 docker tag ${ECR}:${params.SERVICE}-${params.ROLLBACK_TAG} ${ECR}:${params.SERVICE}-latest
                             fi
                             
-                            docker compose -f docker-compose.app.yml up -d
-                            docker compose -f docker-compose.app.yml restart nginx
+                            docker compose -f docker-compose.monitoring.yml up -d --remove-orphans
+                            docker compose -f docker-compose.app.yml up -d --remove-orphans
                             ./fix-blackbox.sh
                             echo "Rollback to ${params.ROLLBACK_TAG} Done"
                         '
@@ -166,7 +163,7 @@ pipeline {
         }
 
         stage('Run Database Migration') {
-            when { expression { params.ACTION == 'deploy' && (params.SERVICE == 'all' || params.SERVICE == 'django') } }
+            when { expression { params.ACTION == 'deploy' && params.SERVICE == 'all' } }
             steps {
                 sshagent(['ec2-ssh-key']) {
                     sh """
