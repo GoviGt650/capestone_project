@@ -7,21 +7,9 @@ pipeline {
     }
 
     parameters {
-        choice(
-            name: 'ACTION',
-            choices: ['deploy', 'rollback'],
-            description: 'Choose deployment action'
-        )
-        choice(
-            name: 'SERVICE',
-            choices: ['all', 'node', 'django', 'fastapi', 'dotnet', 'nginx', 'monitoring'],
-            description: 'Select service to deploy or rollback'
-        )
-        string(
-            name: 'ROLLBACK_TAG',
-            defaultValue: '',
-            description: 'Enter previous build number for rollback example: 25'
-        )
+        choice(name: 'ACTION', choices: ['deploy', 'rollback'], description: 'Choose deployment action')
+        choice(name: 'SERVICE', choices: ['all', 'node', 'django', 'fastapi', 'dotnet', 'nginx', 'monitoring'], description: 'Select service')
+        string(name: 'ROLLBACK_TAG', defaultValue: '', description: 'Enter build number for rollback')
     }
 
     environment {
@@ -41,9 +29,7 @@ pipeline {
         }
 
         stage('Login To AWS ECR') {
-            when {
-                expression { params.ACTION == 'deploy' && params.SERVICE != 'monitoring' }
-            }
+            when { expression { params.ACTION == 'deploy' && params.SERVICE != 'monitoring' } }
             steps {
                 sh """
                     aws ecr get-login-password --region ${AWS_REGION} \
@@ -53,9 +39,7 @@ pipeline {
         }
 
         stage('Build And Push Docker Images') {
-            when {
-                expression { params.ACTION == 'deploy' && params.SERVICE != 'monitoring' && params.SERVICE != 'nginx' }
-            }
+            when { expression { params.ACTION == 'deploy' && params.SERVICE != 'monitoring' && params.SERVICE != 'nginx' } }
             steps {
                 script {
                     def services = [
@@ -64,12 +48,9 @@ pipeline {
                         fastapi : './backend/fastapi-app',
                         dotnet  : './backend/dotnet-app'
                     ]
-
                     def targets = (params.SERVICE == 'all') ? services.keySet() : [params.SERVICE]
-
                     targets.each { service ->
                         sh """
-                            echo "Building ${service}"
                             docker build -t ${service} ${services[service]}
                             docker tag ${service}:latest ${ECR}:${service}-latest
                             docker tag ${service}:latest ${ECR}:${service}-${BUILD_NUMBER}
@@ -88,7 +69,8 @@ pipeline {
                         ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
                             mkdir -p ~/monitoring/blackbox ~/nginx ~/database
                         '
-                        scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${EC2_IP}:~/docker-compose.yml
+                        scp -o StrictHostKeyChecking=no docker-compose.app.yml ubuntu@${EC2_IP}:~/docker-compose.app.yml
+                        scp -o StrictHostKeyChecking=no docker-compose.monitoring.yml ubuntu@${EC2_IP}:~/docker-compose.monitoring.yml
                         scp -o StrictHostKeyChecking=no load-secrets.sh ubuntu@${EC2_IP}:~/load-secrets.sh
                         scp -o StrictHostKeyChecking=no fix-blackbox.sh ubuntu@${EC2_IP}:~/fix-blackbox.sh
                         scp -o StrictHostKeyChecking=no nginx/nginx.conf ubuntu@${EC2_IP}:~/nginx/nginx.conf
@@ -105,9 +87,7 @@ pipeline {
         }
 
         stage('Deploy Services') {
-            when {
-                expression { params.ACTION == 'deploy' }
-            }
+            when { expression { params.ACTION == 'deploy' } }
             steps {
                 sshagent(['ec2-ssh-key']) {
                     script {
@@ -115,10 +95,11 @@ pipeline {
                             sh """
                                 ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
                                     cd ~
-                                    docker compose up -d --remove-orphans prometheus grafana alertmanager node_exporter cadvisor nginx-exporter blackbox
+                                    docker compose -f docker-compose.monitoring.yml pull
+                                    docker compose -f docker-compose.monitoring.yml up -d --remove-orphans
                                     sleep 5
-                                    ./fix-blackbox.sh
-                                    echo "Monitoring Stack Deployed"
+                                    docker compose -f docker-compose.monitoring.yml ps
+                                    echo "Monitoring Deployed"
                                 '
                             """
                         } else {
@@ -130,25 +111,23 @@ pipeline {
                                     chmod +x load-secrets.sh
                                     ./load-secrets.sh
                                     
-                                    # STEP 1: Start monitoring first (if not running)
-                                    docker compose up -d --remove-orphans prometheus grafana alertmanager node_exporter cadvisor nginx-exporter blackbox
+                                    # Start monitoring first
+                                    docker compose -f docker-compose.monitoring.yml up -d --remove-orphans
                                     sleep 10
                                     
-                                    # STEP 2: Start backend services
-                                    docker compose pull ${params.SERVICE == 'all' ? '' : params.SERVICE}
-                                    docker compose up -d --remove-orphans ${params.SERVICE == 'all' ? '' : params.SERVICE}
+                                    # Start app services
+                                    docker compose -f docker-compose.app.yml pull ${params.SERVICE == 'all' ? '' : params.SERVICE}
+                                    docker compose -f docker-compose.app.yml up -d --remove-orphans ${params.SERVICE == 'all' ? '' : params.SERVICE}
                                     sleep 10
                                     
-                                    # STEP 3: Restart nginx to pick up new backend IPs
-                                    docker compose restart nginx
+                                    # Restart nginx + fix blackbox
+                                    docker compose -f docker-compose.app.yml restart nginx
                                     sleep 5
-                                    
-                                    # STEP 4: Fix blackbox with new nginx IP
                                     chmod +x fix-blackbox.sh
                                     ./fix-blackbox.sh
                                     
-                                    docker compose ps
-                                    echo "Deployment Complete - Build: ${BUILD_NUMBER}"
+                                    docker compose -f docker-compose.app.yml ps
+                                    echo "Deployed Build: ${BUILD_NUMBER}"
                                 '
                             """
                         }
@@ -158,9 +137,7 @@ pipeline {
         }
 
         stage('Rollback Service') {
-            when {
-                expression { params.ACTION == 'rollback' }
-            }
+            when { expression { params.ACTION == 'rollback' } }
             steps {
                 sshagent(['ec2-ssh-key']) {
                     sh """
@@ -178,11 +155,10 @@ pipeline {
                                 docker tag ${ECR}:${params.SERVICE}-${params.ROLLBACK_TAG} ${ECR}:${params.SERVICE}-latest
                             fi
                             
-                            docker compose up -d
-                            sleep 5
-                            docker compose restart nginx
+                            docker compose -f docker-compose.app.yml up -d
+                            docker compose -f docker-compose.app.yml restart nginx
                             ./fix-blackbox.sh
-                            echo "Rollback to Build ${params.ROLLBACK_TAG} Complete"
+                            echo "Rollback to ${params.ROLLBACK_TAG} Done"
                         '
                     """
                 }
@@ -190,9 +166,7 @@ pipeline {
         }
 
         stage('Run Database Migration') {
-            when {
-                expression { params.ACTION == 'deploy' && (params.SERVICE == 'all' || params.SERVICE == 'django') }
-            }
+            when { expression { params.ACTION == 'deploy' && (params.SERVICE == 'all' || params.SERVICE == 'django') } }
             steps {
                 sshagent(['ec2-ssh-key']) {
                     sh """
@@ -208,8 +182,8 @@ pipeline {
     }
 
     post {
-        success { echo "Build ${BUILD_NUMBER} Completed Successfully!" }
+        success { echo "Build ${BUILD_NUMBER} Completed!" }
         failure { echo "Build ${BUILD_NUMBER} Failed!" }
-        always  { echo "Pipeline Execution Finished" }
+        always  { echo "Pipeline Finished" }
     }
 }
