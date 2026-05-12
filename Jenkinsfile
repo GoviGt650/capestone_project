@@ -114,11 +114,15 @@ pipeline {
                                     docker compose -f docker-compose.monitoring.yml up -d
                                     sleep 10
                                     
-                                    # STEP 2: Start app services (no remove-orphans)
+                                    # STEP 2: Start app services
                                     docker compose -f docker-compose.app.yml up -d
                                     sleep 10
                                     
-                                    # STEP 3: Fix blackbox
+                                    # Restart nginx to refresh DNS
+                                    docker compose -f docker-compose.app.yml restart nginx
+                                    sleep 5
+                                    
+                                    # Fix blackbox
                                     chmod +x fix-blackbox.sh
                                     ./fix-blackbox.sh
                                     
@@ -156,6 +160,9 @@ pipeline {
                             
                             docker compose -f docker-compose.monitoring.yml up -d
                             docker compose -f docker-compose.app.yml up -d
+                            sleep 10
+                            docker compose -f docker-compose.app.yml restart nginx
+                            sleep 5
                             ./fix-blackbox.sh
                             echo "Rollback to ${params.ROLLBACK_TAG} Done"
                         '
