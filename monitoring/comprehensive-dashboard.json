@@ -1,26 +1,58 @@
 {
   "dashboard": {
     "id": null,
-    "uid": "comprehensive-monitoring",
-    "title": "Comprehensive Service Monitoring",
-    "tags": [
-      "prometheus",
-      "microservices"
-    ],
-    "timezone": "browser",
-    "schemaVersion": 16,
-    "version": 0,
-    "refresh": "10s",
     "panels": [
       {
-        "id": 1,
-        "title": "Services Health Status",
-        "type": "stat",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [
+              {
+                "color": "green",
+                "text": "UP",
+                "type": "value",
+                "value": "1"
+              },
+              {
+                "color": "red",
+                "text": "DOWN",
+                "type": "value",
+                "value": "0"
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "green",
+                  "value": 1
+                }
+              ]
+            }
+          }
+        },
         "gridPos": {
           "h": 3,
           "w": 24,
           "x": 0,
           "y": 0
+        },
+        "id": 1,
+        "options": {
+          "orientation": "horizontal",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "values": false
+          },
+          "textMode": "auto"
         },
         "targets": [
           {
@@ -44,60 +76,34 @@
             "refId": "D"
           }
         ],
-        "fieldConfig": {
-          "defaults": {
-            "mappings": [
-              {
-                "type": "value",
-                "value": "1",
-                "text": "UP",
-                "color": "green"
-              },
-              {
-                "type": "value",
-                "value": "0",
-                "text": "DOWN",
-                "color": "red"
-              }
-            ],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "red",
-                  "value": null
-                },
-                {
-                  "color": "green",
-                  "value": 1
-                }
-              ]
-            },
-            "color": {
-              "mode": "thresholds"
-            }
-          }
-        },
-        "options": {
-          "reduceOptions": {
-            "values": false,
-            "calcs": [
-              "lastNotNull"
-            ]
-          },
-          "orientation": "horizontal",
-          "textMode": "auto"
-        }
+        "title": "Services Health Status",
+        "type": "stat"
       },
       {
-        "id": 2,
-        "title": "EC2 CPU Usage",
-        "type": "timeseries",
+        "fieldConfig": {
+          "defaults": {
+            "max": 100,
+            "min": 0,
+            "unit": "percent"
+          }
+        },
         "gridPos": {
           "h": 8,
           "w": 12,
           "x": 0,
           "y": 3
+        },
+        "id": 2,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last",
+              "mean",
+              "max"
+            ],
+            "displayMode": "table",
+            "placement": "bottom"
+          }
         },
         "targets": [
           {
@@ -106,34 +112,34 @@
             "refId": "A"
           }
         ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "percent",
-            "min": 0,
-            "max": 100
-          }
-        },
-        "options": {
-          "legend": {
-            "displayMode": "table",
-            "placement": "bottom",
-            "calcs": [
-              "last",
-              "mean",
-              "max"
-            ]
-          }
-        }
+        "title": "EC2 CPU Usage",
+        "type": "timeseries"
       },
       {
-        "id": 3,
-        "title": "EC2 Memory Usage",
-        "type": "timeseries",
+        "fieldConfig": {
+          "defaults": {
+            "max": 100,
+            "min": 0,
+            "unit": "percent"
+          }
+        },
         "gridPos": {
           "h": 8,
           "w": 12,
           "x": 12,
           "y": 3
+        },
+        "id": 3,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last",
+              "mean",
+              "max"
+            ],
+            "displayMode": "table",
+            "placement": "bottom"
+          }
         },
         "targets": [
           {
@@ -142,34 +148,34 @@
             "refId": "A"
           }
         ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "percent",
-            "min": 0,
-            "max": 100
-          }
-        },
-        "options": {
-          "legend": {
-            "displayMode": "table",
-            "placement": "bottom",
-            "calcs": [
-              "last",
-              "mean",
-              "max"
-            ]
-          }
-        }
+        "title": "EC2 Memory Usage",
+        "type": "timeseries"
       },
       {
-        "id": 8,
-        "title": "Container CPU Usage",
-        "type": "timeseries",
+        "fieldConfig": {
+          "defaults": {
+            "decimals": 2,
+            "min": 0,
+            "unit": "percent"
+          }
+        },
         "gridPos": {
           "h": 8,
           "w": 12,
           "x": 0,
           "y": 11
+        },
+        "id": 8,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last",
+              "mean",
+              "max"
+            ],
+            "displayMode": "table",
+            "placement": "bottom"
+          }
         },
         "targets": [
           {
@@ -198,34 +204,33 @@
             "refId": "E"
           }
         ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "percent",
-            "min": 0,
-            "decimals": 2
-          }
-        },
-        "options": {
-          "legend": {
-            "displayMode": "table",
-            "placement": "bottom",
-            "calcs": [
-              "last",
-              "mean",
-              "max"
-            ]
-          }
-        }
+        "title": "Container CPU Usage",
+        "type": "timeseries"
       },
       {
-        "id": 9,
-        "title": "Container Memory Usage",
-        "type": "timeseries",
+        "fieldConfig": {
+          "defaults": {
+            "decimals": 1,
+            "unit": "decbytes"
+          }
+        },
         "gridPos": {
           "h": 8,
           "w": 12,
           "x": 12,
           "y": 11
+        },
+        "id": 9,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last",
+              "mean",
+              "max"
+            ],
+            "displayMode": "table",
+            "placement": "bottom"
+          }
         },
         "targets": [
           {
@@ -254,33 +259,33 @@
             "refId": "E"
           }
         ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "decbytes",
-            "decimals": 1
-          }
-        },
-        "options": {
-          "legend": {
-            "displayMode": "table",
-            "placement": "bottom",
-            "calcs": [
-              "last",
-              "mean",
-              "max"
-            ]
-          }
-        }
+        "title": "Container Memory Usage",
+        "type": "timeseries"
       },
       {
-        "id": 4,
-        "title": "API Request Rate (NGINX Total)",
-        "type": "timeseries",
+        "fieldConfig": {
+          "defaults": {
+            "decimals": 2,
+            "unit": "reqps"
+          }
+        },
         "gridPos": {
           "h": 8,
           "w": 12,
           "x": 0,
           "y": 19
+        },
+        "id": 4,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last",
+              "mean",
+              "max"
+            ],
+            "displayMode": "table",
+            "placement": "bottom"
+          }
         },
         "targets": [
           {
@@ -289,33 +294,33 @@
             "refId": "A"
           }
         ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "reqps",
-            "decimals": 2
-          }
-        },
-        "options": {
-          "legend": {
-            "displayMode": "table",
-            "placement": "bottom",
-            "calcs": [
-              "last",
-              "mean",
-              "max"
-            ]
-          }
-        }
+        "title": "API Request Rate (NGINX Total)",
+        "type": "timeseries"
       },
       {
-        "id": 14,
-        "title": "NGINX Connections",
-        "type": "timeseries",
+        "fieldConfig": {
+          "defaults": {
+            "decimals": 0,
+            "unit": "short"
+          }
+        },
         "gridPos": {
           "h": 8,
           "w": 12,
           "x": 12,
           "y": 19
+        },
+        "id": 14,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last",
+              "mean",
+              "max"
+            ],
+            "displayMode": "table",
+            "placement": "bottom"
+          }
         },
         "targets": [
           {
@@ -329,33 +334,34 @@
             "refId": "B"
           }
         ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "short",
-            "decimals": 0
-          }
-        },
-        "options": {
-          "legend": {
-            "displayMode": "table",
-            "placement": "bottom",
-            "calcs": [
-              "last",
-              "mean",
-              "max"
-            ]
-          }
-        }
+        "title": "NGINX Connections",
+        "type": "timeseries"
       },
       {
-        "id": 5,
-        "title": "API Latency - All Frameworks",
-        "type": "timeseries",
+        "fieldConfig": {
+          "defaults": {
+            "decimals": 4,
+            "unit": "s"
+          }
+        },
         "gridPos": {
           "h": 10,
           "w": 24,
           "x": 0,
           "y": 27
+        },
+        "id": 5,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last",
+              "min",
+              "max",
+              "mean"
+            ],
+            "displayMode": "table",
+            "placement": "bottom"
+          }
         },
         "targets": [
           {
@@ -379,34 +385,34 @@
             "refId": "D"
           }
         ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "s",
-            "decimals": 4
-          }
-        },
-        "options": {
-          "legend": {
-            "displayMode": "table",
-            "placement": "bottom",
-            "calcs": [
-              "last",
-              "min",
-              "max",
-              "mean"
-            ]
-          }
-        }
+        "title": "API Latency - All Frameworks",
+        "type": "timeseries"
       },
       {
-        "id": 6,
-        "title": "Error Rate",
-        "type": "timeseries",
+        "fieldConfig": {
+          "defaults": {
+            "decimals": 2,
+            "max": 100,
+            "min": 0,
+            "unit": "percent"
+          }
+        },
         "gridPos": {
           "h": 6,
           "w": 12,
           "x": 0,
           "y": 37
+        },
+        "id": 6,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last",
+              "max"
+            ],
+            "displayMode": "table",
+            "placement": "bottom"
+          }
         },
         "targets": [
           {
@@ -430,58 +436,57 @@
             "refId": "D"
           }
         ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "percent",
-            "min": 0,
-            "max": 100,
-            "decimals": 2
-          }
-        },
-        "options": {
-          "legend": {
-            "displayMode": "table",
-            "placement": "bottom",
-            "calcs": [
-              "last",
-              "max"
-            ]
-          }
-        }
+        "title": "Error Rate",
+        "type": "timeseries"
       },
       {
-        "id": 7,
-        "title": "Disk Usage",
-        "type": "gauge",
+        "fieldConfig": {
+          "defaults": {
+            "max": 100,
+            "min": 0,
+            "unit": "percent"
+          }
+        },
         "gridPos": {
           "h": 6,
           "w": 6,
           "x": 12,
           "y": 37
         },
+        "id": 7,
         "targets": [
           {
             "expr": "100 - ((min(node_filesystem_avail_bytes{fstype=\"ext4\"}) * 100) / min(node_filesystem_size_bytes{fstype=\"ext4\"}))",
             "refId": "A"
           }
         ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "percent",
-            "min": 0,
-            "max": 100
-          }
-        }
+        "title": "Disk Usage",
+        "type": "gauge"
       },
       {
-        "id": 12,
-        "title": "Network Traffic",
-        "type": "timeseries",
+        "fieldConfig": {
+          "defaults": {
+            "decimals": 1,
+            "unit": "Bps"
+          }
+        },
         "gridPos": {
           "h": 6,
           "w": 18,
           "x": 0,
           "y": 43
+        },
+        "id": 12,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last",
+              "mean",
+              "max"
+            ],
+            "displayMode": "table",
+            "placement": "bottom"
+          }
         },
         "targets": [
           {
@@ -495,29 +500,24 @@
             "refId": "B"
           }
         ],
-        "fieldConfig": {
-          "defaults": {
-            "unit": "Bps",
-            "decimals": 1
-          }
-        },
-        "options": {
-          "legend": {
-            "displayMode": "table",
-            "placement": "bottom",
-            "calcs": [
-              "last",
-              "mean",
-              "max"
-            ]
-          }
-        }
+        "title": "Network Traffic",
+        "type": "timeseries"
       }
+    ],
+    "refresh": "10s",
+    "schemaVersion": 16,
+    "tags": [
+      "prometheus",
+      "microservices"
     ],
     "time": {
       "from": "now-1h",
       "to": "now"
-    }
+    },
+    "timezone": "browser",
+    "title": "Comprehensive Service Monitoring",
+    "uid": "comprehensive-monitoring",
+    "version": 1
   },
   "overwrite": true
 }
