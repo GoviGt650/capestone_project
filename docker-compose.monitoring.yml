@@ -85,6 +85,23 @@ services:
     networks:
       - monitoring-net
 
+  grafana-init:
+    image: curlimages/curl:latest
+    container_name: grafana-init
+    depends_on:
+      - grafana
+      - prometheus
+    volumes:
+      - ./monitoring/comprehensive-dashboard.json:/dashboard.json:ro
+    command: >
+      sh -c "
+        sleep 20 &&
+        curl -X POST http://grafana:3000/api/dashboards/db -H 'Content-Type: application/json' -d @/dashboard.json &&
+        echo 'Dashboard auto-loaded'
+      "
+    networks:
+      - monitoring-net
+
 networks:
   monitoring-net:
     external: true
